@@ -6,6 +6,8 @@ Growler middleware which responds to HTTP/2 upgrade requests.
 """
 
 from growler.http.errors import HTTPErrorBadRequest
+from base64 import b64decode
+
 
 class HTTP2:
     """
@@ -46,14 +48,15 @@ class HTTP2:
 
         if do_http2:
             try:
-                assert PROTO_DICT[req.headers['UPGRADE']] == req.protocol
-                settings = req.headers['UPGRADE']
-                assert isinstance(settings, str)
-            except:
-                raise HTTPErrorBadRequest()
+                assert self.PROTO_DICT[req.headers['UPGRADE']] == req.protocol
+                settings = b64decode(req.headers['HTTP2-SETTINGS'])
+            except Exception as e:
+                return
 
-        proto = req._protocol
-        proto.responders.append(GrowlerHTTP2Responder(proto))
+            GrowlerHTTP2Responder.switch_protocols(req, res)
+
+            proto = req._protocol
+            proto.responders.append(GrowlerHTTP2Responder(proto))
 
 
 class GrowlerHTTP2Responder:
@@ -62,7 +65,8 @@ class GrowlerHTTP2Responder:
     from the 'standard' responder upon an upgrade header from the client. The
     implementation still needs to be done.
     """
-    PREFACE = (0x505249202a20485454502f322e300d0a0d0a534d0d0a0d0a,)
+    # PREFACE = 0x505249202a20485454502f322e300d0a0d0a534d0d0a0d0a
+    PREFACE = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
 
     def __init__(self, protocol):
         """
