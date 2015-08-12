@@ -156,9 +156,8 @@ class HTTPResponse:
         self.headers['location'] = location
 
     def links(self, links):
-        """Sets the Link """
-        s = ['<{}>; rel="{}"'.format(link, rel)
-             for link, rel in links.items()]
+        """Sets the response's Link header"""
+        s = ["<%s>; rel=\"%s\"" % pair for pair in links.items()]
         self.headers['Link'] = ','.join(s)
 
     def json(self, body, status=200):
