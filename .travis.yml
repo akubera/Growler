@@ -2,20 +2,25 @@
 # Travis CI configuration
 #
 
-# sudo: required
+sudo: required
 dist: trusty
 
 language: python
+
+addons:
+  apt:
+    packages:
+      - python3
 
 python:
   - "3.4"
   - "3.5"
 
 install:
-  - pip install -q pytest-cov python-coveralls pytest-asyncio
+  - pip install --upgrade -q pytest-cov python-coveralls pytest-asyncio
 
 script:
-  - python setup.py pytest --addopts '--cov=growler --cov-report=term-missing'
+  - python setup.py pytest --addopts '--cov=growler --cov-report=term-missing -v'
 
 after_success:
   - coveralls
